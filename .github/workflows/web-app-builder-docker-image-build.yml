@@ -1,0 +1,40 @@
+name: Web App Builder / Build Docker image
+run-name: ${{ github.actor }} is building an image
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'version'
+        default: 'master'
+        required: true
+      tag:
+        description: 'image tag'
+        default: 'latest'
+        required: true
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout [s118th] version [${{ inputs.version }}]
+        uses: actions/checkout@v4
+        with:
+          repository: ro-ro-by/s118th
+          ref: ${{ inputs.version }}
+          token: ${{ secrets.REPO_TOKEN }}
+          path: src
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:src/symfony-web-app-build"
+          push: true
+          tags: isxam/s118th-web-app-builder:${{ inputs.tag }}
