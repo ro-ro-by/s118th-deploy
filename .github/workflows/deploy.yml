@@ -50,4 +50,4 @@ jobs:
           entrypoint: /bin/sh
       - name: Upload assets to S3
         run: |
-          aws s3 cp dist/src/public/assets s3://s118th-dev-web-app-assets/assets --recursive
+          aws s3 sync --delete dist/src/public/assets s3://s118th-dev-web-app-assets/assets
