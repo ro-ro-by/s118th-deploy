@@ -1,0 +1,40 @@
+name: Deploy Application
+run-name: ${{ github.actor }} is deploying application
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment'
+        type: environment
+        required: true
+      version:
+        description: 'version'
+        default: 'master'
+        required: true
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-central-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Checkout [s118th-deploy] current branch
+        uses: actions/checkout@v4
+        with:
+          path: deploy
+      - name: Checkout [s118th] version [${{ inputs.version }}]
+        uses: actions/checkout@v4
+        with:
+          repository: ro-ro-by/s118th
+          ref: ${{ inputs.version }}
+          token: ${{ secrets.REPO_TOKEN }}
+          path: src
+      - name: Show src
+        run: |
+          cd src
+          ls -la
