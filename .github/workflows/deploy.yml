@@ -11,6 +11,10 @@ on:
         description: 'version'
         default: 'master'
         required: true
+      stage:
+        description: 'stage'
+        default: 'dev'
+        required: true
 jobs:
   main:
     runs-on: ubuntu-latest
@@ -34,7 +38,16 @@ jobs:
           ref: ${{ inputs.version }}
           token: ${{ secrets.REPO_TOKEN }}
           path: src
-      - name: Show src
+
+      - name: Build artifacts
         run: |
-          cd src
-          ls -la
+          chmod -R 777 src
+          docker run -v ./src/app:/var/www/html/app -v ./dist:/var/www/html/build isxam/s118th-web-app-builder:latest bash deploy.sh --rm
+      - name: Serverless stack deploy
+        uses: serverless/github-action@v3.2
+        with:
+          args: -c "cd ./dist/src && serverless deploy --stage ${{ inputs.stage }}"
+          entrypoint: /bin/sh
+      - name: Upload assets to S3
+        run: |
+          aws s3 cp dist/src/public/assets s3://s118th-dev-web-app-assets/assets --recursive

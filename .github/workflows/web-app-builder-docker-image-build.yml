@@ -35,6 +35,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: "{{defaultContext}}:src/symfony-web-app-build"
+          context: "${{ github.workspace }}/src/symfony-web-app-build"
           push: true
           tags: isxam/s118th-web-app-builder:${{ inputs.tag }}
